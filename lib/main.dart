@@ -109,7 +109,7 @@ class _TodoPageState extends State<TodoPage> {
               child: Column(
                 children: [
 
-                  // IMAGE ADDED HERE ✅
+
                   Image.asset(
                     "assets/task.png",
                     height: 100,
