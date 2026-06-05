@@ -126,7 +126,6 @@ class _TodoPageState extends State<TodoPage> {
                       shape: BoxShape.circle,
                     ),
                     child:
-
                     const Icon(
                       Icons.add_task,
                       size: 40,
