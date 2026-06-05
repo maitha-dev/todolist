@@ -99,7 +99,6 @@ class _TodoPageState extends State<TodoPage> {
         child: Column(
           children: [
 
-            // CORE WIDGETS
             Container(
               padding: const EdgeInsets.all(10),
               margin: const EdgeInsets.only(bottom: 15),
@@ -110,7 +109,14 @@ class _TodoPageState extends State<TodoPage> {
               child: Column(
                 children: [
 
-                  // Container WIDGETS
+                  // IMAGE ADDED HERE ✅
+                  Image.asset(
+                    "assets/task.png",
+                    height: 100,
+                  ),
+
+                  const SizedBox(height: 10),
+
                   Container(
                     height: 80,
                     width: 80,
@@ -127,7 +133,6 @@ class _TodoPageState extends State<TodoPage> {
 
                   const SizedBox(height: 10),
 
-                  // Row widget
                   const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -145,7 +150,6 @@ class _TodoPageState extends State<TodoPage> {
 
                   const SizedBox(height: 10),
 
-                  // Stack widget
                   SizedBox(
                     width: 60,
                     height: 60,
@@ -169,7 +173,6 @@ class _TodoPageState extends State<TodoPage> {
               ),
             ),
 
-            // TextField
             TextField(
               controller: taskController,
               decoration: InputDecoration(
