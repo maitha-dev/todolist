@@ -125,7 +125,9 @@ class _TodoPageState extends State<TodoPage> {
                       color: Colors.blue.shade300,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child:
+
+                    const Icon(
                       Icons.add_task,
                       size: 40,
                       color: Colors.blue,
