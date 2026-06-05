@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'database_helper.dart';
 
 void main() {
-  runApp(
-    const MyApp(),
-  );
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -37,7 +35,6 @@ class _TodoPageState extends State<TodoPage> {
     _refreshTasks();
   }
 
-  // Load tasks from database
   void _refreshTasks() async {
     final data = await dbHelper.getTasks();
     setState(() {
@@ -51,7 +48,6 @@ class _TodoPageState extends State<TodoPage> {
     });
   }
 
-  // Add task to database
   void _addTask() async {
     if (taskController.text.isEmpty) return;
 
@@ -64,18 +60,18 @@ class _TodoPageState extends State<TodoPage> {
     _refreshTasks();
   }
 
-  // Update task status in database
   void _toggleTask(int index) async {
     final task = tasks[index];
+
     await dbHelper.updateTask({
       "id": task["id"],
       "title": task["title"],
       "done": task["done"] ? 0 : 1,
     });
+
     _refreshTasks();
   }
 
-  // Delete task from database
   void _deleteTask(int id) async {
     await dbHelper.deleteTask(id);
     _refreshTasks();
@@ -94,13 +90,86 @@ class _TodoPageState extends State<TodoPage> {
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.blue[300],
-        foregroundColor: Colors.cyan[100],
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
+
+            // CORE WIDGETS
+            Container(
+              padding: const EdgeInsets.all(10),
+              margin: const EdgeInsets.only(bottom: 15),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                children: [
+
+                  // Container WIDGETS
+                  Container(
+                    height: 80,
+                    width: 80,
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade100,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.add_task,
+                      size: 40,
+                      color: Colors.blue,
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // Row widget
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.task),
+                      SizedBox(width: 8),
+                      Text(
+                        "Task Manager",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // Stack widget
+                  SizedBox(
+                    width: 60,
+                    height: 60,
+                    child: Stack(
+                      children: const [
+                        Icon(
+                          Icons.circle,
+                          size: 60,
+                          color: Colors.blue,
+                        ),
+                        Center(
+                          child: Icon(
+                            Icons.check,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // TextField
             TextField(
               controller: taskController,
               decoration: InputDecoration(
@@ -112,12 +181,16 @@ class _TodoPageState extends State<TodoPage> {
                 fillColor: Colors.grey[100],
               ),
             ),
+
             const SizedBox(height: 10),
+
             ElevatedButton(
               onPressed: _addTask,
               child: const Text("Add Task"),
             ),
+
             const SizedBox(height: 20),
+
             Expanded(
               child: ListView.builder(
                 itemCount: tasks.length,
@@ -127,21 +200,20 @@ class _TodoPageState extends State<TodoPage> {
                     child: ListTile(
                       leading: Checkbox(
                         value: tasks[index]["done"],
-                        activeColor: Colors.green,
                         onChanged: (value) {
                           _toggleTask(index);
                         },
+                        activeColor: Colors.green,
                       ),
                       title: Text(
                         tasks[index]["title"],
                         style: TextStyle(
-                          fontWeight: FontWeight.w500,
                           decoration: tasks[index]["done"]
                               ? TextDecoration.lineThrough
                               : TextDecoration.none,
                           color: tasks[index]["done"]
                               ? Colors.grey
-                                             : Colors.black,
+                              : Colors.black,
                         ),
                       ),
                       trailing: IconButton(
