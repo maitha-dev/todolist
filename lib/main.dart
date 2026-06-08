@@ -5,18 +5,20 @@ void main() {
   runApp(const MyApp());
 }
 
+/// ROOT APP
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: TodoPage(),
       debugShowCheckedModeBanner: false,
+      home: TodoPage(),
     );
   }
 }
 
+/// MAIN PAGE
 class TodoPage extends StatefulWidget {
   const TodoPage({super.key});
 
@@ -26,40 +28,45 @@ class TodoPage extends StatefulWidget {
 
 class _TodoPageState extends State<TodoPage> {
   final DatabaseHelper dbHelper = DatabaseHelper();
+  final TextEditingController taskController = TextEditingController();
+
   List<Map<String, dynamic>> tasks = [];
-  TextEditingController taskController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _refreshTasks();
+    _loadTasks();
   }
 
-  void _refreshTasks() async {
+  /// LOAD TASKS
+  void _loadTasks() async {
     final data = await dbHelper.getTasks();
+
     setState(() {
-      tasks = data.map((item) {
-        return {
-          "id": item["id"],
-          "title": item["title"],
-          "done": item["done"] == 1,
-        };
-      }).toList();
+      tasks = data
+          .map((e) => {
+        "id": e["id"],
+        "title": e["title"],
+        "done": e["done"] == 1,
+      })
+          .toList();
     });
   }
 
+  /// ADD TASK
   void _addTask() async {
-    if (taskController.text.isEmpty) return;
+    if (taskController.text.trim().isEmpty) return;
 
     await dbHelper.insertTask({
-      "title": taskController.text,
+      "title": taskController.text.trim(),
       "done": 0,
     });
 
     taskController.clear();
-    _refreshTasks();
+    _loadTasks();
   }
 
+  /// TOGGLE TASK
   void _toggleTask(int index) async {
     final task = tasks[index];
 
@@ -69,25 +76,25 @@ class _TodoPageState extends State<TodoPage> {
       "done": task["done"] ? 0 : 1,
     });
 
-    _refreshTasks();
+    _loadTasks();
   }
 
+  /// DELETE TASK
   void _deleteTask(int id) async {
     await dbHelper.deleteTask(id);
-    _refreshTasks();
+    _loadTasks();
   }
 
   @override
   Widget build(BuildContext context) {
+    final completed = tasks.where((t) => t["done"] == true).length;
+    final remaining = tasks.length - completed;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
           "My Tasks To Do",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 30,
-            fontStyle: FontStyle.italic,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         backgroundColor: Colors.blue,
@@ -95,86 +102,86 @@ class _TodoPageState extends State<TodoPage> {
       ),
 
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
+
         child: Column(
           children: [
 
+            /// HEADER (IMAGE + TITLE)
             Container(
-              padding: const EdgeInsets.all(10),
-              margin: const EdgeInsets.only(bottom: 15),
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
                 children: [
 
-
+                  /// IMAGE (TASK ILLUSTRATION)
                   Image.asset(
                     "assets/images/task.png",
-                    height: 100,
+                    height: MediaQuery.of(context).size.width * 0.25,
                   ),
 
                   const SizedBox(height: 10),
 
-                  Container(
-                    height: 180,
-                    width: 180,
-
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade300,
-                      shape: BoxShape.circle,
-                    ),
-                    child:
-                    const Icon(
-                      Icons.add_task,
-                      size: 40,
-                      color: Colors.blue,
+                  const Text(
+                    "Task Manager",
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 4),
 
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.task),
-                      SizedBox(width: 8),
-                      Text(
-                        "Task Manager",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  SizedBox(
-                    width: 60,
-                    height: 60,
-                    child: Stack(
-                      children: const [
-                        Icon(
-                          Icons.circle,
-                          size: 60,
-                          color: Colors.blue,
-                        ),
-                        Center(
-                          child: Icon(
-                            Icons.check,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
+                  const Text(
+                    "Manage your daily tasks easily",
+                    style: TextStyle(color: Colors.grey),
                   ),
                 ],
               ),
             ),
 
+            const SizedBox(height: 16),
+
+            /// DASHBOARD TITLE
+            const Text(
+              "Dashboard",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            /// DASHBOARD CARDS (GRID RESPONSIVE)
+            LayoutBuilder(
+              builder: (context, constraints) {
+                int columns = constraints.maxWidth > 600 ? 4 : 2;
+
+                return GridView.count(
+                  crossAxisCount: columns,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  childAspectRatio: 2,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  children: [
+                    _card("Total", tasks.length.toString(), Icons.list),
+                    _card("Completed", completed.toString(), Icons.check_circle),
+                    _card("Remaining", remaining.toString(), Icons.pending),
+                    _card("Pending", remaining.toString(), Icons.access_time),
+                  ],
+                );
+              },
+            ),
+
+            const SizedBox(height: 16),
+
+            /// INPUT FIELD
             TextField(
               controller: taskController,
               decoration: InputDecoration(
@@ -182,56 +189,77 @@ class _TodoPageState extends State<TodoPage> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                filled: true,
-                fillColor: Colors.grey[100],
               ),
             ),
 
             const SizedBox(height: 10),
 
-            ElevatedButton(
-              onPressed: _addTask,
-              child: const Text("Add Task"),
+            /// ADD BUTTON
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _addTask,
+                child: const Text("Add Task"),
+              ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
 
+            /// TASK LIST
             Expanded(
               child: ListView.builder(
                 itemCount: tasks.length,
                 itemBuilder: (context, index) {
+                  final task = tasks[index];
+
                   return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 6),
                     child: ListTile(
                       leading: Checkbox(
-                        value: tasks[index]["done"],
-                        onChanged: (value) {
-                          _toggleTask(index);
-                        },
-                        activeColor: Colors.green,
+                        value: task["done"],
+                        onChanged: (_) => _toggleTask(index),
                       ),
+
                       title: Text(
-                        tasks[index]["title"],
+                        task["title"],
                         style: TextStyle(
-                          decoration: tasks[index]["done"]
+                          decoration: task["done"]
                               ? TextDecoration.lineThrough
                               : TextDecoration.none,
-                          color: tasks[index]["done"]
-                              ? Colors.grey
-                              : Colors.black,
                         ),
                       ),
+
                       trailing: IconButton(
                         icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () {
-                          _deleteTask(tasks[index]["id"]);
-                        },
+                        onPressed: () => _deleteTask(task["id"]),
                       ),
                     ),
                   );
                 },
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// DASHBOARD CARD WIDGET
+  Widget _card(String title, String value, IconData icon) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Colors.blue),
+            const SizedBox(height: 4),
+            Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text(value),
           ],
         ),
       ),
