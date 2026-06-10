@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'task_provider.dart';
 
 void main() {
+
   final provider = TaskProvider();
   provider.loadTasks();
 
